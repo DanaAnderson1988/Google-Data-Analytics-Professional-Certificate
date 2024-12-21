@@ -1,0 +1,1204 @@
+---
+title: 'Case Study 1 : Cyclistic'
+author: "Dana Anderson"
+date: "November 12, 2024"
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## R Markdown
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+## Downloaded the necessary libraries for the analysis.
+```{r}
+library(tidyverse)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+library(maps)
+tinytex::install_tinytex(force = TRUE)
+```
+## Read the October 2024 file and inspected it.
+```{r}
+octdata <- read.csv("202410-divvy-tripdata.csv")
+head(octdata)
+glimpse(octdata)
+str(octdata)
+colnames(octdata)
+```
+## Read the September 2024 file and inspected it.
+```{r}
+sepdata <- read.csv("202409-divvy-tripdata.csv")
+head(sepdata)
+glimpse(sepdata)
+str(sepdata)
+colnames(sepdata)
+```
+## Read the August 2024 file and inspected it.
+```{r}
+augdata <- read.csv("202408-divvy-tripdata.csv")
+head(augdata)
+glimpse(augdata)
+str(augdata)
+colnames(augdata)
+```
+## Read the July 2024 file and inspected it.
+```{r}
+juldata <- read.csv("202407-divvy-tripdata.csv")
+head(juldata)
+glimpse(juldata)
+str(juldata)
+colnames(juldata)
+```
+## Read the June 2024 file and inspected it.
+```{r}
+jundata <- read.csv("202406-divvy-tripdata.csv")
+head(jundata)
+glimpse(jundata)
+str(jundata)
+colnames(jundata)
+```
+## Read the May 2024 file and inspected it.
+```{r}
+maydata <- read.csv("202405-divvy-tripdata.csv")
+head(maydata)
+glimpse(maydata)
+str(maydata)
+colnames(maydata)
+```
+## Read the April 2024 file and inspected it.
+```{r}
+aprdata <- read.csv("202404-divvy-tripdata.csv")
+head(aprdata)
+glimpse(aprdata)
+str(aprdata)
+colnames(aprdata)
+```
+## Read the March 2024 file and inspected it.
+```{r}
+mardata <- read.csv("202403-divvy-tripdata.csv")
+head(mardata)
+glimpse(mardata)
+str(mardata)
+colnames(mardata)
+```
+## Read the February 2024 file and inspected it.
+```{r}
+febdata <- read.csv("202402-divvy-tripdata.csv")
+head(febdata)
+glimpse(febdata)
+str(febdata)
+colnames(febdata)
+```
+## Read the January 2024 file and inspected it.
+```{r}
+jandata <- read.csv("202401-divvy-tripdata.csv")
+head(jandata)
+glimpse(jandata)
+str(jandata)
+colnames(jandata)
+```
+## Read the December 2023 file and inspected it.
+```{r}
+decdata <- read.csv("202312-divvy-tripdata.csv")
+head(decdata)
+glimpse(decdata)
+str(decdata)
+colnames(decdata)
+```
+## Read the November 2023 file and inspected it.
+```{r}
+novdata <- read.csv("202311-divvy-tripdata.csv")
+head(novdata)
+glimpse(novdata)
+str(novdata)
+colnames(novdata)
+```
+## Combined all 12 monthly files into a single dataframe and saved it as a .csv file as well.
+```{r}
+bikedata <- rbind(octdata, sepdata, augdata, juldata, jundata, maydata, aprdata, mardata, febdata, jandata, decdata, novdata)
+write.csv(bikedata, "bikedata.csv")
+```
+## Inspected the new base dataframe that I will start working on.
+```{r}
+head(bikedata)
+summary(bikedata)
+```
+## Inspected the Ride ID Column.
+```{r}
+str(bikedata$ride_id)
+
+mincharrideid <- min(nchar(bikedata$ride_id))
+print(paste("Minimum Character Length of Ride ID:", mincharrideid))
+
+maxcharrideid <- max(nchar(bikedata$ride_id))
+print(paste("Maximum Character Length of Ride ID:", maxcharrideid))
+
+narideid <- sum(is.na(bikedata$ride_id))
+print(paste("Number of NA Values in Ride ID:", narideid))
+
+emptyrideid <- sum(is_empty(bikedata$ride_id))
+print(paste("Number of Empty Values in Ride ID:", emptyrideid))
+
+nullrideid <- is.null(bikedata$ride_id)
+print(paste("Does the Ride ID Column have any null values?", nullrideid))
+```
+## Inspected the Rideable Type Column.
+```{r}
+str(bikedata$rideable_type)
+
+count(bikedata, rideable_type)
+
+minchartype <- min(nchar(bikedata$rideable_type))
+print(paste("Minimum Character Length of Rideable Type:", minchartype))
+
+maxchartype <- max(nchar(bikedata$rideable_type))
+print(paste("Maximum Character Length of Rideable Type:", maxchartype))
+
+natype <- sum(is.na(bikedata$rideable_type))
+print(paste("Number of NA Values in Rideable Type:", natype))
+
+emptytype <- sum(is_empty(bikedata$rideable_type))
+print(paste("Number of Empty Values in Rideable Type:", emptytype))
+
+nulltype <- is.null(bikedata$rideable_type)
+print(paste("Does the Rideable Type Column have any null values?", nulltype))
+```
+## Inspected the Started At and Ended at Columns.
+```{r}
+str(bikedata$started_at)
+
+minstartdt <- min(bikedata$started_at)
+print(paste("Minimum Value of Started At:", minstartdt))
+
+mincharstartdt <- min(nchar(bikedata$started_at))
+print(paste("Minimum Character Length of Started At:", mincharstartdt))
+
+maxstartdt <- max(bikedata$started_at)
+print(paste("Maximum Value of Started At:", maxstartdt))
+
+maxcharstartdt <- max(nchar(bikedata$started_at))
+print(paste("Maximum Character Length of Started At:", maxcharstartdt))
+
+nastartdt <- sum(is.na(bikedata$started_at))
+print(paste("Number of NA Values in Started At:", nastartdt))
+
+emptystartdt <- sum(is_empty(bikedata$started_at))
+print(paste("Number of Empty Values in Started At:", emptystartdt))
+
+nullstartdt <- is.null(bikedata$started_at)
+print(paste("Does the Started At Column have any null values?", nullstartdt))
+
+str(bikedata$ended_at)
+
+minenddt <- min(bikedata$ended_at)
+print(paste("Minimum Value of Ended At:", minenddt))
+
+mincharenddt <- min(nchar(bikedata$ended_at))
+print(paste("Minimum Character Length of Ended At:", mincharenddt))
+
+maxenddt <- max(bikedata$ended_at)
+print(paste("Maximum Value of Ended At:", maxenddt))
+
+maxcharenddt <- max(nchar(bikedata$ended_at))
+print(paste("Maximum Character Length of Ended At:", maxcharenddt))
+
+naenddt <- sum(is.na(bikedata$ended_at))
+print(paste("Number of NA Values in Ended At:", naenddt))
+
+emptyenddt <- sum(is_empty(bikedata$ended_at))
+print(paste("Number of Empty Values in Ended At:", emptyenddt))
+
+nullenddt <- is.null(bikedata$ended_at)
+print(paste("Does the Ended At Column have any null values?", nullenddt))
+```
+## Inspected the Start Station Name and End Station Name Columns.
+```{r}
+count(bikedata, start_station_name)
+
+numstartname <- n_distinct(bikedata$start_station_name)
+print(paste("Number of Stations in Station Start:", numstartname))
+
+mincharstartname <- min(nchar(bikedata$start_station_name))
+print(paste("Minimum Character Length of Station Start:", mincharstartname))
+
+maxcharstartname <- max(nchar(bikedata$start_station_name))
+print(paste("Maximum Character Length of Station Start:", maxcharstartname))
+
+nastartname <- sum(is.na(bikedata$start_station_name))
+print(paste("Number of NA Values in Station Start:", nastartname))
+
+emptystartname <- sum(is_empty(bikedata$start_station_name))
+print(paste("Number of Empty Values in Station Start:", emptystartname))
+
+nullstartname <- is.null(bikedata$start_station_name)
+print(paste("Does the Station Start Column have any null values?", nullstartname))
+
+count(bikedata, end_station_name)
+
+numendname <- n_distinct(bikedata$end_station_name)
+print(paste("Number of Stations in Station End:", numendname))
+
+mincharendname <- min(nchar(bikedata$end_station_name))
+print(paste("Minimum Character Length of Station End:", mincharendname))
+
+maxcharendname <- max(nchar(bikedata$end_station_name))
+print(paste("Maximum Character Length of Station End:", maxcharendname))
+
+naendname <- sum(is.na(bikedata$end_station_name))
+print(paste("Number of NA Values in Station End:", naendname))
+
+emptyendname <- sum(is_empty(bikedata$end_station_name))
+print(paste("Number of Empty Values in Station End:", emptyendname))
+
+nullendname <- is.null(bikedata$end_station_name)
+print(paste("Does the Station End Column have any null values?", nullendname))
+```
+## Inspected the Start Station ID and End Station ID Columns.
+```{r}
+str(bikedata$start_station_id)
+
+numstartid <- n_distinct(bikedata$start_station_id)
+print(paste("Number of Station IDs in Start Station ID:", numstartid))
+
+mincharstartid <- min(nchar(bikedata$start_station_id))
+print(paste("Minimum Character Length of Start Station ID:", mincharstartid))
+
+maxcharstartid <- max(nchar(bikedata$start_station_id))
+print(paste("Maximum Character Length of Start Station ID:", maxcharstartid))
+
+nastartid <- sum(is.na(bikedata$start_station_id))
+print(paste("Number of NA Values in Start Station ID:", nastartid))
+
+emptystartid <- sum(is_empty(bikedata$start_station_id))
+print(paste("Number of Empty Values in Start Station ID:", emptystartid))
+
+nullstartid <- is.null(bikedata$start_station_id)
+print(paste("Does the Start Station ID Column have any null values?", nullstartid))
+
+str(bikedata$end_station_id)
+
+numendid <- n_distinct(bikedata$end_station_id)
+print(paste("Number of Station IDs in End Station ID:", numendid))
+
+mincharendid <- min(nchar(bikedata$end_station_id))
+print(paste("Minimum Character Length of End Station ID:", mincharendid))
+
+maxcharendid <- max(nchar(bikedata$end_station_id))
+print(paste("Maximum Character Length of End Station ID:", maxcharendid))
+
+naendid <- sum(is.na(bikedata$end_station_id))
+print(paste("Number of NA Values in End Station ID:", naendid))
+
+emptyendid <- sum(is_empty(bikedata$end_station_id))
+print(paste("Number of Empty Values in End Station ID:", emptyendid))
+
+nullendid <- is.null(bikedata$end_station_id)
+print(paste("Does the End Station ID Column have any null values?", nullendid))
+```
+## Inspected the Start Latitude and Start Longitude Columns.
+```{r}
+str(bikedata$start_lat)
+
+minstartlat <- min(bikedata$start_lat)
+print(paste("Minimum Value of Start Latitude:", minstartlat))
+
+mincharstartlat <- min(nchar(bikedata$start_lat))
+print(paste("Minimum Character Length of Start Latitude:", mincharstartlat))
+
+maxstartlat <- max(bikedata$start_lat)
+print(paste("Maximum Value of Start Latitude:", maxstartlat))
+
+maxcharstartlat <- max(nchar(bikedata$start_lat))
+print(paste("Maximum Character Length of Start Latitude:", maxcharstartlat))
+
+nastartlat <- sum(is.na(bikedata$start_lat))
+print(paste("Number of NA Values in Start Latitude:", nastartlat))
+
+emptystartlat <- sum(is_empty(bikedata$start_lat))
+print(paste("Number of Empty Values in Start Latitude:", emptystartlat))
+
+nullstartlat <- is.null(bikedata$start_lat)
+print(paste("Does the Start Latitude Column have any null values?", nullstartlat))
+
+str(bikedata$start_lng)
+
+minstartlng <- min(bikedata$start_lng)
+print(paste("Minimum Value of Start Longitude:", minstartlng))
+
+mincharstartlng <- min(nchar(bikedata$start_lng))
+print(paste("Minimum Character Length of Start Longitude:", mincharstartlng))
+
+maxstartlng <- max(bikedata$start_lng)
+print(paste("Maximum Value of Start Longitude:", maxstartlng))
+
+maxcharstartlng <- max(nchar(bikedata$start_lng))
+print(paste("Maximum Character Length of Start Longitude:", maxcharstartlng))
+
+nastartlng <- sum(is.na(bikedata$start_lng))
+print(paste("Number of NA Values in Start Longitude:", nastartlng))
+
+emptystartlng <- sum(is_empty(bikedata$start_lng))
+print(paste("Number of Empty Values in Start Longitude:", emptystartlng))
+
+nullstartlng <- is.null(bikedata$start_lng)
+print(paste("Does the Start Longitude Column have any null values?", nullstartlng))
+```
+## Inspected the End Latitude and End Longitude Columns.
+```{r}
+str(bikedata$end_lat)
+
+minendlat <- min(bikedata$end_lat)
+print(paste("Minimum Value of End Latitude:", minendlat))
+
+mincharendlat <- min(nchar(bikedata$end_lat))
+print(paste("Minimum Character Length of End Latitude:", mincharendlat))
+
+maxendlat <- max(bikedata$end_lat)
+print(paste("Maximum Value of End Latitude:", maxendlat))
+
+maxcharendlat <- max(nchar(bikedata$end_lat))
+print(paste("Maximum Character Length of End Latitude:", maxcharendlat))
+
+naendlat <- sum(is.na(bikedata$end_lat))
+print(paste("Number of NA Values in End Latitude:", naendlat))
+
+emptyendlat <- sum(is_empty(bikedata$end_lat))
+print(paste("Number of Empty Values in End Latitude:", emptyendlat))
+
+nullendlat <- is.null(bikedata$end_lat)
+print(paste("Does the End Latitude Column have any null values?", nullendlat))
+
+str(bikedata$end_lng)
+
+minendlng <- min(bikedata$end_lng)
+print(paste("Minimum Value of End Longitude:", minendlng))
+
+mincharendlng <- min(nchar(bikedata$end_lng))
+print(paste("Minimum Character Length of End Longitude:", mincharendlng))
+
+maxendlng <- max(bikedata$end_lng)
+print(paste("Maximum Value of End Longitude:", maxendlng))
+
+maxcharendlng <- max(nchar(bikedata$end_lng))
+print(paste("Maximum Character Length of End Longitude:", maxcharendlng))
+
+naendlng <- sum(is.na(bikedata$end_lng))
+print(paste("Number of NA Values in End Longitude:", naendlng))
+
+emptyendlng <- sum(is_empty(bikedata$end_lng))
+print(paste("Number of Empty Values in End Longitude:", emptyendlng))
+
+nullendlng <- is.null(bikedata$end_lng)
+print(paste("Does the End Longitude Column have any null values?", nullendlng))
+```
+## Inspected the Member Casual Column.
+```{r}
+str(bikedata$member_casual)
+
+count(bikedata, member_casual)
+
+mincharmemcas <- min(nchar(bikedata$member_casual))
+print(paste("Minimum Character Length of Member Casual:", mincharmemcas))
+
+maxcharmemcas <- max(nchar(bikedata$member_casual))
+print(paste("Maximum Character Length of Member Casual:", maxcharmemcas))
+
+namemcas <- sum(is.na(bikedata$member_casual))
+print(paste("Number of NA Values in Member Casual:", namemcas))
+
+emptymemcas <- sum(is_empty(bikedata$member_casual))
+print(paste("Number of Empty Values in Member Casual:", emptymemcas))
+
+nullmemcas <- is.null(bikedata$member_casual)
+print(paste("Does the Member Casual Column have any null values?", nullmemcas))
+```
+## Inspected Start Station Name, End Station Name, Start Station ID, and End Station ID further. The initial inspection for all four variables showed no null values, no missing values, and no empty values. However, the minimum character length for all 4 fields was zero. This indicated that there is some data missing. Looked at the records with zero character length.
+```{r}
+startnamezero <- bikedata %>% 
+  filter(start_station_id  == "")
+
+endnamezero <- bikedata %>% 
+  filter(end_station_id  == "")
+
+startidzero <- bikedata %>% 
+  filter(start_station_id  == "")
+
+endidzero <- bikedata %>% 
+  filter(end_station_id  == "")
+```
+## Found how many records within the four variables are less than 1 in character length.
+```{r}
+nrow(startnamezero)
+nrow(endnamezero)
+nrow(startidzero)
+nrow(endidzero)
+```
+## Removed both ID variables because they each have a large number of missing records and also because location identifiers aren't the focus of this analysis. I will note with any analysis pertaining to start_station_name that there are 1,079,270 missing values and any analysis pertaining to end_station_name that there are 1,112,056 missing values.
+```{r}
+bdnewna <- subset(bikedata, select=-c(start_station_id,end_station_id))
+head(bdnewna)
+```
+## There were 7,417 NA values in the End Latitude and End Longitude variables. This accounted for 0.00125 (0.125%) of the data (5,933,712 original rows of data before cleaning). Removed those.
+```{r}
+5933712 - 7417
+nrow(bikedata) - sum(is.na(bdnewna$end_lng))
+7417/5933712
+(sum(is.na(bdnewna$end_lng)))/(nrow(bikedata))
+bdnew <- drop_na(bdnewna)
+str(bdnew)
+```
+## Reinspected the End Latitude and End Longitude Columns. The minimum character length for the End Latitude and End Longitude variables were no longer zero.
+```{r}
+str(bdnew$end_lat)
+
+minendlat <- min(bdnew$end_lat)
+print(paste("Minimum Value of End Latitude:", minendlat))
+
+mincharendlat <- min(nchar(bdnew$end_lat))
+print(paste("Minimum Character Length of End Latitude:", mincharendlat))
+
+maxendlat <- max(bdnew$end_lat)
+print(paste("Maximum Value of End Latitude:", maxendlat))
+
+maxcharendlat <- max(nchar(bdnew$end_lat))
+print(paste("Maximum Character Length of End Latitude:", maxcharendlat))
+
+naendlat <- sum(is.na(bdnew$end_lat))
+print(paste("Number of NA Values in End Latitude:", naendlat))
+
+emptyendlat <- sum(is_empty(bdnew$end_lat))
+print(paste("Number of Empty Values in End Latitude:", emptyendlat))
+
+nullendlat <- is.null(bdnew$end_lat)
+print(paste("Does the End Latitude Column have any null values?", nullendlat))
+
+str(bdnew$end_lng)
+
+minendlng <- min(bdnew$end_lng)
+print(paste("Minimum Value of End Longitude:", minendlng))
+
+mincharendlng <- min(nchar(bdnew$end_lng))
+print(paste("Minimum Character Length of End Longitude:", mincharendlng))
+
+maxendlng <- max(bdnew$end_lng)
+print(paste("Maximum Value of End Longitude:", maxendlng))
+
+maxcharendlng <- max(nchar(bdnew$end_lng))
+print(paste("Maximum Character Length of End Longitude:", maxcharendlng))
+
+naendlng <- sum(is.na(bdnew$end_lng))
+print(paste("Number of NA Values in End Longitude:", naendlng))
+
+emptyendlng <- sum(is_empty(bdnew$end_lng))
+print(paste("Number of Empty Values in End Longitude:", emptyendlng))
+
+nullendlng <- is.null(bdnew$end_lng)
+print(paste("Does the End Longitude Column have any null values?", nullendlng))
+```
+## Converted the started_at column and the ended_at column into Date Time.
+```{r}
+bdnew$ended_at <- ymd_hms(bdnew$ended_at)
+bdnew$started_at <- ymd_hms(bdnew$started_at)
+head(bdnew)
+```
+## Calculated the ride length by subtracting the started_at column from the ended_at column and dispensed the result in a new column, ride_length. Converted the results from seconds to minutes and rounded the results to 2 decimal places.
+```{r}
+bdnew$ride_length <- (bdnew$ended_at - bdnew$started_at)
+bdnew$ride_length <- as.numeric(bdnew$ride_length, units = "mins")
+bdnew$ride_length <- round(bdnew$ride_length, 2)
+head(bdnew)
+```
+## Inspected the newly created ride_length column.
+```{r}
+str(bdnew$end_lat)
+
+minridelength <- min(bdnew$ride_length)
+print(paste("Minimum Value of Ride Length:", minridelength))
+
+mincharridelength <- min(nchar(bdnew$ride_length))
+print(paste("Minimum Character Length of Ride Length:", mincharridelength))
+
+maxridelength <- max(bdnew$ride_length)
+print(paste("Maximum Value of Ride Length:", maxridelength))
+
+maxcharridelength <- max(nchar(bdnew$ride_length))
+print(paste("Maximum Character Length of Ride Length:", maxcharridelength))
+
+naridelength <- sum(is.na(bdnew$ride_length))
+print(paste("Number of NA Values in Ride Length:", naridelength))
+
+emptyridelength <- sum(is_empty(bdnew$ride_length))
+print(paste("Number of Empty Values in Ride Length:", emptyridelength))
+
+nullridelength <- is.null(bdnew$ride_length)
+print(paste("Does the Ride Length Column have any null values?", nullridelength))
+```
+## Identified rows with negative values in ride_length, which doesn't make sense. Inspected one row (record) to see what was going on. Looks like the started_at and ended_at values were swapped. Found how many rows had this error or had zero ride_length.
+```{r}
+bdnew[which.min(bdnew$ride_length),]
+nrow(bdnew[bdnew$ride_length < 0,])
+```
+## There were 258 rows (records) with the error. This accounted for 0.0000435 (0.00435%) of the data (5,933,712 original rows of data before cleaning). Removed those.
+```{r}
+5926295 - 258
+(nrow(bdnew)) - (nrow(bdnew[bdnew$ride_length < 0,]))
+258/5933712
+(nrow(bdnew[bdnew$ride_length < 0,]))/(nrow(bikedata))
+bdfinal <- bdnew[bdnew$ride_length >= 0, ]
+str(bdfinal)
+```
+## Attempted to create a pipe/summary table that stated the statistics for ride_length, based on the member type.
+```{r}
+ride_stats <- bdfinal %>%
+  group_by(member_casual) %>% 
+  summarise(max_ride_length = max(ride_length),
+            min_ride_length = min(ride_length),
+            average_ride_length = mean(ride_length),
+            median_ride_length = median(ride_length))
+head(ride_stats)
+```
+## Found that there were some values for ride_length that were zeros. This doesn't make sense, as the data set stated that all rides that were less than 60 seconds (1 min) were removed from the data set. Inspected to find out more.
+```{r}
+bdfinal[which.min(bdfinal$ride_length),]
+nrow(bdfinal[bdfinal$ride_length < 1,])
+```
+## There were 134,526 rows (records) with this error. This accounted for 0.0227 (2.27%) of the data (5,933,712 original rows of data before cleaning). Removed those.
+```{r}
+5926037 - 134526
+(nrow(bdfinal)) - (nrow(bdfinal[bdfinal$ride_length < 1,]))
+134526/5933712
+(nrow(bdfinal[bdfinal$ride_length < 1,]))/(nrow(bikedata))
+bdfinal <- bdfinal[bdfinal$ride_length >= 1, ]
+str(bdfinal)
+```
+## Tried the pipe/summary table again.
+```{r}
+ride_stats <- bdfinal %>%
+  group_by(member_casual) %>% 
+  summarise(max_ride_length = max(ride_length),
+            min_ride_length = min(ride_length),
+            average_ride_length = mean(ride_length),
+            median_ride_length = median(ride_length))
+head(ride_stats)
+```
+## max_length looks high. Determined what was considered an outlier for the whole data set.
+```{r}
+IQR <- IQR(bdfinal$ride_length)
+loutlier_limit <- (quantile(bdfinal$ride_length, 0.25)) - (1.5*(IQR))
+houtlier_limit <- (quantile(bdfinal$ride_length, 0.75)) + (1.5*(IQR))
+print(IQR)
+print(loutlier_limit)
+print(houtlier_limit)
+```
+## There were 432,039 outliers (records). This accounted for 0.0728 (7.28%) of the data (5,933,712 original rows of data before cleaning). Removed those. 
+```{r}
+bdoutliers <- bdfinal[bdfinal$ride_length > 34.98, ]
+nrow(bdoutliers)
+5791511 - 433841
+(nrow(bdfinal)) - (nrow(bdoutliers))
+433841/5933712
+(nrow(bdfinal[bdfinal$ride_length > 34.98, ]))/(nrow(bikedata))
+bdfinal <- bdfinal[bdfinal$ride_length <= 34.98, ]
+str(bdfinal)
+```
+## Determined exactly how much data was cleaned out of the main data set before making calculations and performing analysis. 576,042 rows (records) removed. This accounted for 0.0971 (9.71%) of the data (5,933,712 original rows of data before cleaning). The final data set consists of 5,357,670 rows (records).
+```{r}
+7417 + 258 + 134526 + 433841
+576042/(nrow(bikedata))
+nrow(bdfinal)
+```
+## Tried the pipe/summary table again, with additional statistics.
+```{r}
+ride_stats <- bdfinal %>%
+  group_by(member_casual) %>% 
+  summarise(min_ride_length = min(ride_length),
+            max_ride_length = max(ride_length),
+            average_ride_length = round(mean(ride_length), 2),
+            median_ride_length = median(ride_length),
+            ride_length_25_quantile = quantile(ride_length, 0.25),
+            ride_length_75_quantile = quantile(ride_length, 0.75),
+            ride_length_IQR = IQR(ride_length),
+            ride_length_sd = round(sd(ride_length), 2),
+            ride_length_var = round(var(ride_length), 2))
+head(ride_stats)
+```
+## Created a function to find the mode of a dataset, called get_mode.
+```{r}
+get_mode <- function(x) {
+  uniq_x <- unique(x)
+  uniq_x[which.max(tabulate(match(x, uniq_x)))]
+}
+```
+## Created a set of only casual rider data and a set of only member rider data. Then created a set of ride_length values for casual riders and set of only ride_length values for member riders.
+```{r}
+casualset <- bdfinal[bdfinal$member_casual == "casual", ]
+crideset <- subset(casualset, select=c(ride_length))
+head(crideset)
+
+memberset <- bdfinal[bdfinal$member_casual == "member", ]
+mrideset <- subset(memberset, select=c(ride_length))
+head(mrideset)
+```
+## Performed a t-test on the ride_length for casual and member riders to test for statistical significance before moving forward. Null Hypothesis (Ho): The ride lengths of both casual and member riders are not statistically different from each other. Alternate Hypothesis (Ha): The ride lengths of casual riders are statistically different from the ride length of member riders. Results: p = 0.00000000000000022, reject the null hypothesis and accept the alternative. The data sets are statistically different from each other.
+```{r}
+t.test(crideset, mrideset)
+```
+## Calculated the mode of ride_length for both casual and member rider types.
+```{r}
+casualridemode <- get_mode(crideset$ride_length)
+print(casualridemode)
+
+memberridemode <- get_mode(mrideset$ride_length)
+print(memberridemode)
+```
+## Created a boxplot of ride_length.
+```{r}
+ride_length_plot <- ggplot(bdfinal, aes(x = member_casual, y = ride_length, fill = member_casual)) +
+   geom_boxplot() +
+   guides(fill = "none") +
+   labs(
+      title = "Average Bike Ride Length by Customer Type",
+      caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC ",
+      x = "Customer Type",
+      y = "Ride Length (mins)"
+    ) +
+   theme_classic()
+ride_length_plot
+ggsave("problem1.jpeg")
+```
+## Calculated the days of the week for date and time each trip started and dispensed the results in a new column, dotwstart.
+```{r}
+bdfinal$dotw_start <- weekdays(bdfinal$started_at)
+head(bdfinal)
+```
+## Redid the individual casual and member data sets to include the new dotw_start field. Got the mode of days of the week for both casual and member riders. 
+```{r}
+casualset <- bdfinal[bdfinal$member_casual == "casual", ]
+memberset <- bdfinal[bdfinal$member_casual == "member", ]
+
+cdayset1 <- subset(casualset, select=c(dotw_start))
+mdayset1 <- subset(memberset, select=c(dotw_start))
+
+casualdaymode <- get_mode(cdayset1$dotw_start)
+print(casualdaymode)
+memberdaymode <- get_mode(mdayset1$dotw_start)
+print(memberdaymode)
+```
+## Created a pipe/summary table of the average ride length per day of the week for both casual and member riders.
+```{r}
+dotw_stats1 <- bdfinal %>%
+  group_by(member_casual, dotw_start) %>% 
+  summarize(avg_ride_length = round(mean(ride_length), 2), .groups = 'keep') %>%
+  mutate(dotw_start = factor(dotw_start, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))) %>%
+  arrange(member_casual, dotw_start)
+dotw_stats1
+```
+## Created a pipe/summary table for additional statistics on days of the week for casual riders.
+```{r}
+cdayset2 <- subset(casualset, select=c(dotw_start, ride_length))
+
+cdotw_stats <- cdayset2 %>%
+  group_by(dotw_start) %>% 
+  mutate(dotw_start = factor(dotw_start, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))) %>%
+  summarise(min_ride_length = min(ride_length),
+            max_ride_length = max(ride_length),
+            average_ride_length = round(mean(ride_length), 2),
+            median_ride_length = median(ride_length),
+            mode_ride_length = get_mode(ride_length),
+            ride_length_25_quantile = quantile(ride_length, 0.25),
+            ride_length_75_quantile = quantile(ride_length, 0.75),
+            ride_length_IQR = IQR(ride_length),
+            ride_length_sd = round(sd(ride_length), 2),
+            ride_length_var = round(var(ride_length), 2))
+print(cdotw_stats)
+```
+## Created a pipe/summary table for additional statistics on days of the week for member riders.
+```{r}
+mdayset2 <- subset(memberset, select=c(dotw_start, ride_length))
+
+mdotw_stats <- mdayset2 %>%
+  group_by(dotw_start) %>% 
+  mutate(dotw_start = factor(dotw_start, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))) %>%
+  summarise(min_ride_length = min(ride_length),
+            max_ride_length = max(ride_length),
+            average_ride_length = round(mean(ride_length), 2),
+            median_ride_length = median(ride_length),
+            mode_ride_length = get_mode(ride_length),
+            ride_length_25_quantile = quantile(ride_length, 0.25),
+            ride_length_75_quantile = quantile(ride_length, 0.75),
+            ride_length_IQR = IQR(ride_length),
+            ride_length_sd = round(sd(ride_length), 2),
+            ride_length_var = round(var(ride_length), 2))
+print(mdotw_stats)
+```
+## Created a pipe of ride length per day of the week for both casual and member riders, with ordered days of the week, to create a box plot.
+```{r}
+dotw_stats2 <- bdfinal %>%
+  mutate(dotw_start = factor(dotw_start, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")))
+head(dotw_stats2)
+```
+## Created a box plot for average ride length per day of the week for both casual riders and member riders. 
+```{r}
+week_length_plot <- ggplot(dotw_stats2, aes(x = dotw_start, y = ride_length, fill = member_casual)) +
+  geom_boxplot() +
+  labs(
+    title = "Average Bike Ride Length per Day of the Week",
+    caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC",
+    x = "Day of the Week",
+    y = "Ride Length (mins)"
+  ) +
+  theme_classic()
+week_length_plot
+ggsave("problem2a.jpeg")
+```
+## Created a pipe/summary table of the total number of rides per day of the week for both casual and annual members.
+```{r}
+dotw_stats3 <- bdfinal %>%
+  group_by(member_casual) %>% 
+  count(dotw_start, name = "n_rides") %>% 
+  mutate(dotw_start = factor(dotw_start, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))) %>%
+  arrange(member_casual, dotw_start)
+dotw_stats3
+```
+## Created a bar graph for total number of rides per day of the week for both casual riders and member riders.
+```{r}
+week_num_plot <- ggplot(dotw_stats3, aes(x = dotw_start, y = n_rides, fill = member_casual)) +
+   geom_bar(stat = "identity", position = "dodge") +
+   labs(
+      title = "Number of Bike Rides per Day of the Week",
+      caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC ",
+      x = "Day of the Week",
+      y = "Number of Bike Rides (n)"
+    ) +
+   theme_classic()
+week_num_plot
+ggsave("problem2b.jpeg")
+```
+## Calculated the month of the year for date and time each trip started and dispensed the results in a new column, moty_start.
+```{r}
+bdfinal$moty_start <- format(bdfinal$started_at, "%b")
+head(bdfinal)
+```
+## Calculated the season of the year for date and time each trip started and dispensed the results in a new column, soty_start.
+```{r}
+bdfinal <- bdfinal %>%
+  mutate(soty_start = case_when(
+    bdfinal$moty_start %in% c('Dec', 'Jan', 'Feb') ~ 'Winter',
+    bdfinal$moty_start %in% c('Mar', 'Apr', 'May') ~ 'Spring',
+    bdfinal$moty_start %in% c('Jun', 'Jul', 'Aug') ~ 'Summer',
+    bdfinal$moty_start %in% c('Sep', 'Oct', 'Nov') ~ 'Fall'))
+head(bdfinal)
+```
+## Redid the individual casual and member data sets to include the new moty_start and soty_start fields. Got the mode of season of the year for both casual and member riders.
+```{r}
+casualset <- bdfinal[bdfinal$member_casual == "casual", ]
+memberset <- bdfinal[bdfinal$member_casual == "member", ]
+
+cseasonset1 <- subset(casualset, select=c(soty_start))
+mseasonset1 <- subset(memberset, select=c(soty_start))
+
+casualseasonmode <- get_mode(cseasonset1$soty_start)
+print(casualseasonmode)
+memberseasonmode <- get_mode(mseasonset1$soty_start)
+print(memberseasonmode)
+```
+## Created a pipe/summary table of the average ride length per month of the year for both casual and member riders.
+```{r}
+soty_stats1 <- bdfinal %>%
+  group_by(member_casual, soty_start) %>% 
+  summarize(avg_ride_length = round(mean(ride_length), 2), .groups = 'keep') %>%
+  mutate(soty_start = factor(soty_start, levels = c("Spring", "Summer", "Fall", "Winter"))) %>%
+  arrange(member_casual, soty_start)
+soty_stats1
+```
+## Created a pipe/summary table for additional statistics on season of the year for casual riders.
+```{r}
+cseasonset2 <- subset(casualset, select=c(soty_start, ride_length))
+
+csoty_stats <- cseasonset2 %>%
+  group_by(soty_start) %>% 
+  mutate(soty_start = factor(soty_start, levels = c("Spring", "Summer", "Fall", "Winter"))) %>%
+  summarise(min_ride_length = min(ride_length),
+            max_ride_length = max(ride_length),
+            average_ride_length = round(mean(ride_length), 2),
+            median_ride_length = median(ride_length),
+            mode_ride_length = get_mode(ride_length),
+            ride_length_25_quantile = quantile(ride_length, 0.25),
+            ride_length_75_quantile = quantile(ride_length, 0.75),
+            ride_length_IQR = IQR(ride_length),
+            ride_length_sd = round(sd(ride_length), 2),
+            ride_length_var = round(var(ride_length), 2))
+print(csoty_stats)
+```
+## Created a pipe/summary table for additional statistics on season of the year for member riders.
+```{r}
+mseasonset2 <- subset(memberset, select=c(soty_start, ride_length))
+
+msoty_stats <- mseasonset2 %>%
+  group_by(soty_start) %>% 
+  mutate(soty_start = factor(soty_start, levels = c("Spring", "Summer", "Fall", "Winter"))) %>%
+  summarise(min_ride_length = min(ride_length),
+            max_ride_length = max(ride_length),
+            average_ride_length = round(mean(ride_length), 2),
+            median_ride_length = median(ride_length),
+            mode_ride_length = get_mode(ride_length),
+            ride_length_25_quantile = quantile(ride_length, 0.25),
+            ride_length_75_quantile = quantile(ride_length, 0.75),
+            ride_length_IQR = IQR(ride_length),
+            ride_length_sd = round(sd(ride_length), 2),
+            ride_length_var = round(var(ride_length), 2))
+print(msoty_stats)
+```
+## Created a pipe of the ride length per season of the year for both casual and annual members, with ordered seasons of the year, to create a box plot.
+```{r}
+soty_stats2 <- bdfinal %>%
+  mutate(soty_start = factor(soty_start, levels = c("Spring", "Summer", "Fall", "Winter")))
+head(soty_stats2)
+```
+## Created a box plot for average ride length per season of the year for both casual riders and member riders.
+```{r}
+season_length_plot <- ggplot(soty_stats2, aes(x = soty_start, y = ride_length, fill = member_casual)) +
+  geom_boxplot() +
+  labs(
+    title = "Average Bike Ride Length per Season of the Year",
+    caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC",
+    x = "Season of the Year",
+    y = "Ride Length (mins)"
+  ) +
+  theme_classic()
+season_length_plot
+ggsave("problem3a.jpeg")
+```
+## Created a pipe/summary table of the number of rides per season of the year for both casual and annual members.
+```{r}
+soty_stats3 <- bdfinal %>%
+  group_by(member_casual) %>% 
+  count(soty_start, name = "n_rides") %>% 
+  mutate(soty_start = factor(soty_start, levels = c("Spring", "Summer", "Fall", "Winter"))) %>%
+  arrange(member_casual, soty_start)
+soty_stats3
+```
+## Created a bar graph for total number of rides per season of the year for both casual riders and member riders.
+```{r}
+season_num_plot <- ggplot(soty_stats3, aes(x = soty_start, y = n_rides, fill = member_casual)) +
+   geom_bar(stat = "identity", position = "dodge") +
+   labs(
+      title = "Number of Bike Rides per Season of the Year",
+      caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC ",
+      x = "Season of the Year",
+      y = "Number of Bike Rides (n)"
+    ) +
+   theme_classic()
+season_num_plot
+ggsave("problem3b.jpeg")
+```
+## Got the mode of months of the year for both casual and member riders.
+```{r}
+cmonthset1 <- subset(casualset, select=c(moty_start))
+mmonthset1 <- subset(memberset, select=c(moty_start))
+
+casualmonthmode <- get_mode(cmonthset1$moty_start)
+print(casualmonthmode)
+membermonthmode <- get_mode(mmonthset1$moty_start)
+print(membermonthmode)
+```
+## Created a pipe/summary table of the average ride length per month of the year for both casual and member riders.
+```{r}
+moty_stats1 <- bdfinal %>%
+  group_by(member_casual, moty_start) %>% 
+  summarize(avg_ride_length = round(mean(ride_length), 2), .groups = 'keep') %>%
+  mutate(moty_start = factor(moty_start, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))) %>%
+  arrange(member_casual, moty_start)
+moty_stats1
+```
+## Created a pipe/summary table for additional statistics on months of the year for casual riders.
+```{r}
+cmonthset2 <- subset(casualset, select=c(moty_start, ride_length))
+
+cmoty_stats <- cmonthset2 %>%
+  group_by(moty_start) %>% 
+  mutate(moty_start = factor(moty_start, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))) %>%
+  summarise(min_ride_length = min(ride_length),
+            max_ride_length = max(ride_length),
+            average_ride_length = round(mean(ride_length), 2),
+            median_ride_length = median(ride_length),
+            mode_ride_length = get_mode(ride_length),
+            ride_length_25_quantile = quantile(ride_length, 0.25),
+            ride_length_75_quantile = quantile(ride_length, 0.75),
+            ride_length_IQR = IQR(ride_length),
+            ride_length_sd = round(sd(ride_length), 2),
+            ride_length_var = round(var(ride_length), 2))
+print(cmoty_stats)
+```
+## Created a pipe/summary table for additional statistics on months of the year for member riders.
+```{r}
+mmonthset2 <- subset(memberset, select=c(moty_start, ride_length))
+
+mmoty_stats <- mmonthset2 %>%
+  group_by(moty_start) %>% 
+  mutate(moty_start = factor(moty_start, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))) %>%
+  summarise(min_ride_length = min(ride_length),
+            max_ride_length = max(ride_length),
+            average_ride_length = round(mean(ride_length), 2),
+            median_ride_length = median(ride_length),
+            mode_ride_length = get_mode(ride_length),
+            ride_length_25_quantile = quantile(ride_length, 0.25),
+            ride_length_75_quantile = quantile(ride_length, 0.75),
+            ride_length_IQR = IQR(ride_length),
+            ride_length_sd = round(sd(ride_length), 2),
+            ride_length_var = round(var(ride_length), 2))
+print(mmoty_stats)
+```
+## Created a pipe of the ride length per month of the year for both casual and annual members, with ordered months of the year, to create a box plot.
+```{r}
+moty_stats2 <- bdfinal %>%
+  mutate(moty_start = factor(moty_start, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")))
+head(moty_stats2)
+```
+## Created a box plot for average ride length per month of the year for both casual riders and member riders.
+```{r}
+month_length_plot <- ggplot(moty_stats2, aes(x = moty_start, y = ride_length, fill = member_casual)) +
+  geom_boxplot() +
+  labs(
+    title = "Average Bike Ride Length per Month of the Year",
+    caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC",
+    x = "Month of the Year",
+    y = "Ride Length (mins)"
+  ) +
+  theme_classic()
+month_length_plot
+ggsave("problem4a.jpeg")
+```
+## Created a pipe/summary table of the number of rides per month of the year for both casual and annual members.
+```{r}
+moty_stats3 <- bdfinal %>%
+  group_by(member_casual) %>% 
+  count(moty_start, name = "n_rides") %>% 
+  mutate(moty_start = factor(moty_start, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))) %>%
+  arrange(member_casual, moty_start)
+moty_stats3
+```
+## Created a bar graph for total number of rides per month of the year for both casual riders and member riders.
+```{r}
+month_num_plot <- ggplot(moty_stats3, aes(x = moty_start, y = n_rides, fill = member_casual)) +
+   geom_bar(stat = "identity", position = "dodge") +
+   labs(
+      title = "Number of Bike Rides per Month of the Year",
+      caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC ",
+      x = "Month of the Year",
+      y = "Number of Bike Rides (n)"
+    ) +
+   theme_classic()
+month_num_plot
+ggsave("problem4b.jpeg")
+```
+## Got the mode of bike type for both casual and member riders. 
+```{r}
+ctypeset1 <- subset(casualset, select=c(rideable_type ))
+mtypeset1 <- subset(memberset, select=c(rideable_type ))
+
+casualtypemode <- get_mode(ctypeset1$rideable_type )
+print(casualtypemode)
+membertypemode <- get_mode(ctypeset1$rideable_type )
+print(membertypemode)
+```
+## Created a pipe/summary table of the average ride length per bike type for both casual and annual members.
+```{r}
+type_stats1 <- bdfinal %>%
+  group_by(member_casual, rideable_type) %>% 
+  summarize(avg_ride_length = round(mean(ride_length), 2), .groups = 'keep') %>%
+  arrange(member_casual, rideable_type)
+type_stats1
+```
+## Created a pipe/summary table for additional statistics on bike type for casual riders.
+```{r}
+ctypeset2 <- subset(casualset, select=c(rideable_type, ride_length))
+
+ctype_stats <- ctypeset2 %>%
+  group_by(rideable_type) %>% 
+  summarise(min_ride_length = min(ride_length),
+            max_ride_length = max(ride_length),
+            average_ride_length = round(mean(ride_length), 2),
+            median_ride_length = median(ride_length),
+            mode_ride_length = get_mode(ride_length),
+            ride_length_25_quantile = quantile(ride_length, 0.25),
+            ride_length_75_quantile = quantile(ride_length, 0.75),
+            ride_length_IQR = IQR(ride_length),
+            ride_length_sd = round(sd(ride_length), 2),
+            ride_length_var = round(var(ride_length), 2))
+print(ctype_stats)
+```
+## Created a pipe/summary table for additional statistics on months of the year for member riders.
+```{r}
+mtypeset2 <- subset(memberset, select=c(rideable_type, ride_length))
+
+mtype_stats <- mtypeset2 %>%
+  group_by(rideable_type) %>% 
+  summarise(min_ride_length = min(ride_length),
+            max_ride_length = max(ride_length),
+            average_ride_length = round(mean(ride_length), 2),
+            median_ride_length = median(ride_length),
+            mode_ride_length = get_mode(ride_length),
+            ride_length_25_quantile = quantile(ride_length, 0.25),
+            ride_length_75_quantile = quantile(ride_length, 0.75),
+            ride_length_IQR = IQR(ride_length),
+            ride_length_sd = round(sd(ride_length), 2),
+            ride_length_var = round(var(ride_length), 2))
+print(mtype_stats)
+```
+## Created a box plot for average ride length per bike type for both casual riders and member riders.
+```{r}
+ride_type_plot <- ggplot(bdfinal, aes(x = rideable_type, y = ride_length, fill = member_casual)) +
+   geom_boxplot() + 
+   labs(
+      title = "Average Bike Ride Length by Bike Type",
+      caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC ",
+      x = "Bike Type",
+      y = "Ride Length (mins)"
+    ) +
+   theme_classic()
+ride_type_plot
+ggsave("problem5a.jpeg")
+```
+## Created a pipe/summary table of the number of rides per bike type for both casual and annual members.
+```{r}
+type_stats2 <- bdfinal %>%
+  group_by(member_casual) %>% 
+  count(rideable_type, name = "n_rides")
+type_stats2
+```
+## Created a bar graph for total number of rides per bike type for both casual riders and member riders.
+```{r}
+type_num_plot <- ggplot(type_stats2, aes(x = rideable_type, y = n_rides, fill = member_casual)) +
+   geom_bar(stat = "identity", position = "dodge") +
+   labs(
+      title = "Number of Bike Rides per Bike Type",
+      caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC ",
+      x = "Bike Type",
+      y = "Number of Bike Rides (n)"
+    ) +
+   theme_classic()
+type_num_plot
+ggsave("problem5b.jpeg")
+```
+## Created 2 pipes to find the top 10 starting locations and the top 10 ending locations for casual riders. I will note the missing values in my final presentation.
+```{r}
+top_ten_cas <- subset(casualset, select=c(start_station_name, start_lat, start_lng))
+
+top_ten_cs <- top_ten_cas %>%
+  count(start_station_name, name = "n_rides")
+
+top_ten_cstart <- top_ten_cas %>%
+  left_join(top_ten_cs, by = "start_station_name") %>%
+  distinct(start_station_name, .keep_all = TRUE) %>%
+  arrange(desc(n_rides))
+top_ten_cstart <- top_ten_cstart[1:11, ]
+print(top_ten_cstart)
+
+top_ten_cae <- subset(casualset, select=c(end_station_name, end_lat, end_lng))
+
+top_ten_ce <- top_ten_cae %>%
+  count(end_station_name, name = "n_rides")
+
+top_ten_cend <- top_ten_cae %>%
+  left_join(top_ten_ce, by = "end_station_name") %>%
+  distinct(end_station_name, .keep_all = TRUE) %>%
+  arrange(desc(n_rides))
+top_ten_cend <- top_ten_cend[1:11, ]
+print(top_ten_cend)
+```
+## Found just how many missing casual ride start and end locations were missing compared to the casual data set and the overall data set.
+```{r}
+352648 / 1805459
+352648 / 5357670
+376423 / 1805459
+376423 / 5357670
+```
+## Created 2 pipes to find the top 10 starting locations and the top 10 ending locations for member riders. I will note the missing values in my final presentation.
+```{r}
+top_ten_mas <- subset(memberset, select=c(start_station_name, start_lat, start_lng))
+
+top_ten_ms <- top_ten_mas %>%
+  count(start_station_name, name = "n_rides")
+
+top_ten_mstart <- top_ten_mas %>%
+  left_join(top_ten_ms, by = "start_station_name") %>%
+  distinct(start_station_name, .keep_all = TRUE) %>%
+  arrange(desc(n_rides))
+top_ten_mstart <- top_ten_mstart[1:11, ]
+print(top_ten_mstart)
+
+top_ten_mae <- subset(memberset, select=c(end_station_name, end_lat, end_lng))
+
+top_ten_me <- top_ten_mae %>%
+  count(end_station_name, name = "n_rides")
+
+top_ten_mend <- top_ten_mae %>%
+  left_join(top_ten_me, by = "end_station_name") %>%
+  distinct(end_station_name, .keep_all = TRUE) %>%
+  arrange(desc(n_rides))
+top_ten_mend <- top_ten_mend[1:11, ]
+print(top_ten_mend)
+```
+## Found just how many missing member ride start and end locations were missing compared to the member data set and the overall data set.
+```{r}
+617476 / 3552211
+617476 / 5357670
+593251 / 3552211
+593251 / 5357670
+```
+## Some of the casual locations are present in both lists. Combined them into a single list to make it easy.
+```{r}
+top_ten_start_ccut <- top_ten_cstart[2:11,]
+top_ten_end_ccut <- top_ten_cend[11,]
+top_ten_overallc <- bind_rows(top_ten_start_ccut, top_ten_end_ccut)
+print(top_ten_overallc)
+```
+## Some of the member locations are present in both lists. Combined them into a single list to make it easy.
+```{r}
+top_ten_start_mcut <- top_ten_mstart[2:11,]
+top_ten_end_mcut <- top_ten_mend[11,]
+top_ten_overallm <- bind_rows(top_ten_start_mcut, top_ten_end_mcut)
+print(top_ten_overallm)
+```
+## Created a plot that displays the top 10 start locations and the top 10 end locations for casual riders.
+```{r}
+register_google(key = "AIzaSyCkk6Us7Qh_mcA5eHgNWKaNcpSiecYsveM")
+
+chicagom<- c(lon = -87.640, lat = 41.865)
+chicago_mapm <- get_map(location = chicagom, zoom = 12, source = "google", maptype = "terrain")
+
+map_plot <- ggmap(chicago_mapm) +
+  geom_point(data = top_ten_overallm, aes(x = start_lng, y = start_lat), color = "blue", size = 2.5) +
+  geom_point(data = top_ten_overallm, aes(x = end_lng, y = end_lat), color = "blue", size = 2.5) +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  ggtitle("Map of Top 10 Starting and Ending Locations for Member Rides") +
+  labs(caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC ") +
+  theme_minimal()
+map_plot
+ggsave("problem6a.jpeg")
+```
+## Created a plot that displays the top 10 start locations and the top 10 end locations for casual riders.
+```{r}
+register_google(key = "AIzaSyCkk6Us7Qh_mcA5eHgNWKaNcpSiecYsveM")
+
+chicagoc<- c(lon = -87.625, lat = 41.897)
+chicago_mapc <- get_map(location = chicagoc, zoom = 13, source = "google", maptype = "terrain")
+
+map_plot <- ggmap(chicago_mapc) +
+  geom_point(data = top_ten_overallc, aes(x = start_lng, y = start_lat), color = "red", size = 2.5) +
+  geom_point(data = top_ten_overallc, aes(x = end_lng, y = end_lat), color = "red", size = 2.5) +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  ggtitle("Map of Top 10 Starting and Ending Locations for Casual Rides") +
+  labs(caption = "Source: Divvy, operated by Lyft Bikes and Scooters, LLC ") +
+  theme_minimal()
+map_plot
+ggsave("problem6b.jpeg")
+```
